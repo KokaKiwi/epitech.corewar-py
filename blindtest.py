@@ -3,18 +3,16 @@ import sys, argparse, os
 from corewar import blindtest, util
 from termcolor import colored, cprint
 
-# Variables
-
-winners = util.find('champs', '*.cor')
-
 # Arguments
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-n', '--nodisplay', action = 'store_false', dest = 'display')
-parser.add_argument('-d', '--display', action = 'store_true', default = True)
-parser.add_argument('-o', '--one', action = 'store_false', default = True)
-parser.add_argument('-m', '--melee', action = 'store_true', default = False)
+parser.add_argument('-n', '--nodisplay', action = 'store_false', dest = 'display', help = 'Don\'t display result messages.')
+parser.add_argument('-d', '--display', action = 'store_true', default = True, help = 'Display result message [default=true].')
+parser.add_argument('-w', '--winners', action = 'append', default = [], help = 'Add champions directories')
+parser.add_argument('-o', '--one', action = 'store_false', default = True, help = 'Disable one vs one blindtests.')
+parser.add_argument('-m', '--melee', action = 'store_true', default = False, help = 'Enable melee blindtests.')
 parser.add_argument('champion')
+parser.add_argument('champions', nargs = '*')
 
 # Main
 
@@ -40,8 +38,9 @@ def writelog(outfile, filename, win, defeat, ratio, reports):
     outfile.write('Wins    :\n')
     writereports(outfile, reports, filename, True)
 
-def main(filename, display, one, melee):
-    (win, defeat, reports) = blindtest.run(filename, winners, display, one = one, melee = melee)
+def main(filename, champions, display, one, melee):
+    util.Logger.install(os.path.basename(filename).replace('.cor', '.stdout.log'), 'w+')
+    (win, defeat, reports) = blindtest.run(filename, champions, display, one = one, melee = melee)
 
     if win + defeat != 0:
         ratio = float(win) / (win + defeat) * 100
@@ -63,6 +62,9 @@ def main(filename, display, one, melee):
 if __name__ == "__main__":
     args = parser.parse_args()
     try:
-        main(args.champion, args.display, args.one, args.melee)
+        champions = args.champions
+        for wdir in args.winners:
+            champions += util.find(wdir, '*.cor')
+        main(args.champion, champions, args.display, args.one, args.melee)
     except KeyboardInterrupt, e:
         print 'Exiting...'

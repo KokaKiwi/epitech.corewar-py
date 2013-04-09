@@ -4,21 +4,10 @@ from corewar import util, blindtest
 from termcolor import colored, cprint
 from corewar.types import Champion
 
-# Variables
-
-winners = [
-    'champs/2001/forky+bedo/Forky+bedo.cor',
-    'champs/2001/paki/Paki.cor',
-    'champs/La_Vilaine_Du_Marais.cor',
-    # 'champs/Octobre_Rouge_V4.2.cor',
-    # 'champs/jc.cor',
-    # 'champs/toto.cor',
-    # 'champs/raid_aerien.cor'
-]
-
 # Arguments
+
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--directory', action = 'append', default = [])
+parser.add_argument('-d', '--directory', action = 'append', default = [], help = 'Add champions directories.')
 parser.add_argument('champions', nargs = '*')
 
 # Tournoi
@@ -87,8 +76,10 @@ def main(champions):
         (128, min(8, len(champions)))
     ]
 
+    best = ladder[0:16]
+
     count = 1
-    total = min(16, len(champions))
+    total = len(best)
 
     best = ladder[0:16]
 
@@ -110,12 +101,13 @@ def main(champions):
                                         colored('->', 'white', attrs = ['bold']),
                                         ratio_str(winner.win, winner.defeat)))
 
-    result_file = open('result.json', 'w+')
+    result_file = open('logs/result.json', 'w+')
     result_file.write(json.dumps([rank.encode() for rank in ranks], indent=4, separators=(',', ': '), sort_keys = False))
     result_file.close()
 
 if __name__ == "__main__":
     args = parser.parse_args()
+    util.Logger.install('tournoi.log', 'w+')
     champions = args.champions
     for d in args.directory:
         champions += util.find(d, '*.cor')

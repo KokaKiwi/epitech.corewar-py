@@ -15,6 +15,7 @@ winners = [
 
 vm.add('luffy.cor')
 vm.add('champs/toto.cor')
+# vm.add(winners)
 
 winner = vm.launch()
 if winner:
